@@ -30,6 +30,8 @@
     <MASM Include="zad16.asm" />
     <MASM Include="zad17.asm" />
     <MASM Include="zad18.asm" />
+    <MASM Include="zad19.asm" />
+    <MASM Include="zad21.asm" />
     <MASM Include="zad6.asm" />
     <MASM Include="zad7.asm" />
     <MASM Include="zad8.asm" />

@@ -1,11 +1,11 @@
 .686
 .model flat
 extern _ExitProcess@4 : PROC
-public _main
+;public _main
 .data
 
 .code
-_main PROC
+;_main PROC
 	clc ; czyscimy CF
 	rcl eax, 1
 	rcl ebx, 1
@@ -15,5 +15,5 @@ _main PROC
 dalej:
 	nop
 	call _ExitProcess@4
-_main ENDP
+;_main ENDP
 END
