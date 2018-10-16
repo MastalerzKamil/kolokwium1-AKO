@@ -1,11 +1,11 @@
 .686
 .model flat
 extern _ExitProcess@4 : PROC
-public _main
+;public _main
 .data
 mlodsza_LE dw 0
 .code
-_main PROC
+;_main PROC
 	mov eax, [ebx] ; pobieram z pamieci 4 bajty w ktorych zapisana jest liczba
 	mov mlodsza_LE, ax
 	shr eax, 16 ; przesuwam w prawo aby wyodrebnic starsza i mlodsza czesc (Little Endian)
@@ -18,5 +18,5 @@ _main PROC
 	mov eax, ecx
 	nop
 	call _ExitProcess@4
-_main ENDP
+;_main ENDP
 END
