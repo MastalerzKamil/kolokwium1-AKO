@@ -1,11 +1,11 @@
 .686
 .model flat
 extern _ExitProcess@4 : PROC
-public _main
+;public _main
 .data
 
 .code
-_main PROC
+;_main PROC
 	mov esi, 32		; esi-licznik petli po bitach
 	mov cl, 0
 ptl:
@@ -19,5 +19,5 @@ ptl:
 wyjdz_z_petli:
 	nop
 	call _ExitProcess@4
-_main ENDP
+;_main ENDP
 END
