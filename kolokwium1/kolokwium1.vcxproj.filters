@@ -69,5 +69,17 @@
     <MASM Include="zad23.asm">
       <Filter>Source Files</Filter>
     </MASM>
+    <MASM Include="zad24.asm">
+      <Filter>Source Files</Filter>
+    </MASM>
+    <MASM Include="zad25.asm">
+      <Filter>Source Files</Filter>
+    </MASM>
+    <MASM Include="zad26.asm">
+      <Filter>Source Files</Filter>
+    </MASM>
+    <MASM Include="zad27.asm">
+      <Filter>Source Files</Filter>
+    </MASM>
   </ItemGroup>
 </Project>
