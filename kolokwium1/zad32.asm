@@ -9,11 +9,11 @@
 .686
 .model flat
 extern _ExitProcess@4 : PROC
-public _main
+;public _main
 .data
 liczba	dd 10
 .code
-_main PROC
+;_main PROC
 	mov ebx, 10
 	mov eax, 125 ; dla testu. ECX powinien wynosiæ 00000008
 	mov ecx, 0	; zeruje ecx bo to jest sumator cyfr liczby dziesietnej
@@ -27,5 +27,5 @@ ptl:
 	jnz ptl
 	nop
 	call _ExitProcess@4
-_main ENDP
+;_main ENDP
 END
