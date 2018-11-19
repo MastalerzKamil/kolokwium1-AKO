@@ -1,7 +1,7 @@
 .686
 .model flat
 extern _ExitProcess@4 : PROC
-public _main
+;public _main
 
 .data
 znaki		db 61h, 62h, 0c2h, 0a7h, 0h
@@ -9,7 +9,7 @@ rozmiar		dd 0	; rozmiar to ilosc bajtow potrzebnych do zapisu w UTF-16
 					; w tym zadaniu rozpatrujemy tylko przypadki 0h-FFFFh
 					; czyli zawsze zwiekszamy o 1 slowo(2 bajty)
 .code
-_main PROC
+;_main PROC
 	mov eax, 0	; w al beda kolejne bajty z tablicy znaki
 	mov ecx, 0	; ecx -iterator po tablicy znaki
 ptl:
@@ -36,5 +36,5 @@ czy_koniec:
 	jnz ptl
 	push 0
 	call _ExitProcess@4
-_main ENDP
+;_main ENDP
 END
