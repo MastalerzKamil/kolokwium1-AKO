@@ -6,7 +6,7 @@ public _main
 
 .data
 ilosc_swiat		dd 0
-wynik			dd ?,'.',?,0
+wynik			dd ?,'.',?,0,'\n'
 .code
 _main PROC
 	; edx - iterator po bitach miesiaca
@@ -23,13 +23,14 @@ jest_swieto:
 	shl ecx, 24
 	shr ecx, 24	; aby miec pewnosc, ze starsze bity w ecx poza cl sa zerem
 	add ilosc_swiat, 1
-	push dword PTR 16 ; push(dzien+'.'+miesiac+0)
+	push dword PTR 4+4+4+4 ; push(dzien+'.'+miesiac+0)
 	mov wynik, edx	; pierwszy czlon daty
-	mov wynik+8, ecx ; wartosc miesiaca  format: edx.ecx
+	mov edi,(offset wynik)+8 ; adres pod ktorym bedzie miesiac
+	mov ecx, [edi] ; wartosc miesiaca  format: edx.ecx
 	push OFFSET wynik	; wartosc daty
-	push dword PTR 10	; system liczbowy
+	push dword PTR 1	; numer urzadzenia (numer ekranu=1)
 	call __write
-	add esp, 12	; zwolnienie pamieci po wypisaniu daty
+	; add esp, 12	; zwolnienie pamieci po wypisaniu daty
 	dec edx ; aby kolejnybit wziac pod uwage
 	jnz ptl	; jeszcze nie ma konca miesiaca
 	jmp koniec_miesiaca	
