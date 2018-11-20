@@ -7,7 +7,7 @@ public _main
 .data
 ilosc_swiat		dd 0
 swieta			dd 0AAAAAAAAh
-wynik			dd ?,'.',?,0,'\n'
+wynik			dd ?, ?, '.', ?, ?, 0
 miesiac			dd 0, 0
 dzien			dd 0, 0
 system_liczbowy db 10
@@ -21,17 +21,21 @@ _main PROC
 	mov ax, cx	; aby w dzielnej(liczniku dzielenia) byla wartosc miesiaca
 	push ecx	; zapamietuje ecx aby rejestr ten posluzyl do kelejnon zapisywania w pamieci
 	push edi	; zapamietanie celu do ktorego trzeba zapisac. W tym przypadku celem bedzie zmienna miesiac
+	push eax	; zapamietanie eax w celu liczenia
 	mov ecx, 2	; maksymalna ilosc cyfer w miesiacu
 	mov edi, offset miesiac	; miejsce do ktorego bede zapisywal wynik zdekodowanego miesiaca
 licz_miesiac_dziesietnie:
 	div system_liczbowy
 	dec ecx
-	mov byte PTR[edi+4*ecx], ah	; wyliczanie adresu efektywnego dla miesiaca w pamieci czyli adres+4*ilosc_cyfer
+	add ah, '0'	; zamiana liczby na znak ASCII
+	mov byte PTR[edi+4*ecx], ah	; wyliczanie adresu efektywnego dla miesiaca w pamieci czyli adres+4*ilosc_cyfer 
+									; oraz wsadzenie tam cyfry w ASCII
 	cmp al, 0
 	jnz licz_miesiac_dziesietnie
+	pop eax ; zdjecie zawartosci eax sprzed dzielenia
 	pop edi	; zdjecie sprzed zapisu miesiaca 
 	pop ecx	; zdjecie zawartosci miesiaca w ecx
-
+; teraz czas na sprawdzenie dni swiat
 	mov ebx, offset swieta ; testowo dalem zmienna ze swietami
 	mov esi, [ebx]
 	mov edx, 31	; najstarszy bit do testowania
@@ -43,16 +47,72 @@ ptl:
 	jmp koniec_miesiaca ; przypadek gdy jest koniec miesiaca i nie bylo swieta
 jest_swieto:
 	add ilosc_swiat, 1
-	push dword PTR 4+4+4+4 ; push(dzien+dzien+'.'+miesiac+miesiac+0)
-	add edx, '0'
-	mov wynik, edx	; pierwszy czlon daty
-	mov edi,(offset wynik)+8 ; adres pod ktorym bedzie miesiac
-	mov ecx, [edi] ; wartosc miesiaca  format: edx.ecx
+	push ecx	; zapamietanie zawartosci ecx w ktorym jest wartosc miesiaca
+	push edi	; zapamietanie edi w ktorym bedzie zmiennadla dnia miesiaca
+	push eax	; zapamietanie eax w celu zamiany na cyfry
+	mov ecx, 2	; maksymalna liczba cyfr dla dnia
+	mov edi, offset dzien	; adres w pamieci dla zmiennej dzien
+licz_dzien_dziesietnie:
+	div system_liczbowy
+	dec ecx	; zmniejszam bo od prawej strony cyfry wyliczaja sie
+	add ah, '0'	;zamiana iczby na znak ASCII
+	mov byte PTR[edi+4*ecx], ah	; wyliczanie adresu efektywnego dla miesiaca w pamieci czyli adres+4*ilosc_cyfer 
+									; oraz wsadzenie tam cyfry w ASCII
+	cmp al, 0
+	jnz licz_dzien_dziesietnie
+	pop eax	; zdejmuje rejestr do dzielenia
+	pop edi	; zdejmuje rejestr do docelowego zapisu
+	pop ecx	; zdejmuje rejestr z wartoscia liczby miesiaca
+
+; zapisywanie daty do zmiennej wynik
+	push esi	; zapamietanie w celu adresu skladowej formatu daty
+	push edi	; zapamietywanie docelowego rejestru w celu zapisu danych pod adres zmiennej wynik
+	push eax	; tymczasowo aby w eax byly skladowe daty
+	push ecx	; zapamietanie zawartosci miesiaca w celu wyliczenia adresu efektywnego dla zmiennej wynik
+	mov ecx, 0
+	mov edi, offset wynik
+	mov esi, offset dzien
+	mov eax, [esi]	; cyfra dziesiatek dnia
+	mov [edi+4*ecx], eax	; cyfra dziesiatek dnia w wyniku
+	inc ecx
+	mov eax, [esi+4]	; cyfra jednosci dnia
+	mov [edi+4*ecx], eax	; cyfra jednosci dnia w wyniku
+	inc ecx
+	mov [edi+4*ecx], dword PTR '.'	;przecinek w wyniku
+	inc ecx
+	mov esi, offset miesiac
+	mov eax, [esi]	;cyfra dziesiatek z miesiaca
+	mov [edi+4*ecx], eax	; cyfra dziesiatek miesiaca w wyniku
+	inc ecx
+	mov eax, [esi+4]	; cyfra jednosci z miesiaca
+	mov [edi+4*ecx], eax	; cyfra jednosci z miesiaca w wyniku
+; zerowanie dnia dla kolejnych obiegow petli
+	mov esi, offset dzien
+	mov [esi], dword PTR 0
+	mov [esi+4], dword PTR 0
+; zdejmowanie rejestrow zzapisywania do wyniku
+	pop ecx
+	pop eax
+	pop edi
+	pop esi
+
+; wypisywanie w konsoli
+	push dword PTR 8+4+8+4 ; push(dzien+dzien+'.'+miesiac+miesiac+0)
 	push OFFSET wynik	; wartosc daty
 	push dword PTR 1	; numer urzadzenia (numer ekranu=1)
 	call __write
 	add esp, 12	; zwolnienie pamieci po wypisaniu daty
-	dec edx ; aby kolejnybit wziac pod uwage
+; zerowanie wyniku dla kolejnego swieta
+	push edi	; zapamietanie dotychczasowego edi aby wyzerowac wynik
+	mov edi, offset wynik
+	mov [edi], dword PTR 0	; dzien
+	mov [edi+4], dword PTR 0	; dzien
+	mov [edi+8], dword PTR '.'	; separator
+	mov [edi+12], dword PTR 0	; miesiac
+	mov [edi+ 16], dword PTR 0	; miesiac
+	pop edi
+
+	dec edx ; aby kolejny bit wziac pod uwage
 	jnz ptl	; jeszcze nie ma konca miesiaca
 	jmp koniec_miesiaca	
 koniec_miesiaca:
