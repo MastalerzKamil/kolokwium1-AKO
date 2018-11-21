@@ -18,23 +18,23 @@ _main PROC
 	mov ecx, 9
 	shl ecx, 24
 	shr ecx, 24	; aby miec pewnosc, ze starsze bity w ecx poza cl sa zerem
-	mov ax, cx	; aby w dzielnej(liczniku dzielenia) byla wartosc miesiaca
-	push ecx	; zapamietuje ecx aby rejestr ten posluzyl do kelejnon zapisywania w pamieci
+	push ebx	; zapamietuje ebx aby rejestr ten posluzyl do kelejnego zapisywania w pamieci
 	push edi	; zapamietanie celu do ktorego trzeba zapisac. W tym przypadku celem bedzie zmienna miesiac
 	push eax	; zapamietanie eax w celu liczenia
-	mov ecx, 2	; maksymalna ilosc cyfer w miesiacu
+	mov ebx, 2	; maksymalna ilosc cyfer w miesiacu
 	mov edi, offset miesiac	; miejsce do ktorego bede zapisywal wynik zdekodowanego miesiaca
+	mov ax, cx	; aby w dzielnej(liczniku dzielenia) byla wartosc miesiaca
 licz_miesiac_dziesietnie:
 	div system_liczbowy
-	dec ecx
+	dec ebx
 	add ah, '0'	; zamiana liczby na znak ASCII
-	mov byte PTR[edi+4*ecx], ah	; wyliczanie adresu efektywnego dla miesiaca w pamieci czyli adres+4*ilosc_cyfer 
+	mov byte PTR[edi+4*ebx], ah	; wyliczanie adresu efektywnego dla miesiaca w pamieci czyli adres+4*ilosc_cyfer 
 									; oraz wsadzenie tam cyfry w ASCII
 	cmp al, 0
 	jnz licz_miesiac_dziesietnie
 	pop eax ; zdjecie zawartosci eax sprzed dzielenia
 	pop edi	; zdjecie sprzed zapisu miesiaca 
-	pop ecx	; zdjecie zawartosci miesiaca w ecx
+	pop ebx	; zdjecie zawartosci miesiaca w ecx
 ; teraz czas na sprawdzenie dni swiat
 	mov ebx, offset swieta ; testowo dalem zmienna ze swietami
 	mov esi, [ebx]
@@ -52,12 +52,14 @@ jest_swieto:
 	push eax	; zapamietanie eax w celu zamiany na cyfry
 	mov ecx, 2	; maksymalna liczba cyfr dla dnia
 	mov edi, offset dzien	; adres w pamieci dla zmiennej dzien
+	mov eax, edx	; tymczasowo na czas dzielenia numer bitu zapamietuje
 licz_dzien_dziesietnie:
 	div system_liczbowy
 	dec ecx	; zmniejszam bo od prawej strony cyfry wyliczaja sie
 	add ah, '0'	;zamiana iczby na znak ASCII
 	mov byte PTR[edi+4*ecx], ah	; wyliczanie adresu efektywnego dla miesiaca w pamieci czyli adres+4*ilosc_cyfer 
 									; oraz wsadzenie tam cyfry w ASCII
+	mov ah, 0	; zerowanie ah po zapisaniu do pamieci
 	cmp al, 0
 	jnz licz_dzien_dziesietnie
 	pop eax	; zdejmuje rejestr do dzielenia
@@ -97,11 +99,13 @@ licz_dzien_dziesietnie:
 	pop esi
 
 ; wypisywanie w konsoli
-	push dword PTR 8+4+8+4 ; push(dzien+dzien+'.'+miesiac+miesiac+0)
+	push edx	; zapamietanie edx
+	push dword PTR 24 ; push(dzien+dzien+'.'+miesiac+miesiac+0)
 	push OFFSET wynik	; wartosc daty
 	push dword PTR 1	; numer urzadzenia (numer ekranu=1)
 	call __write
 	add esp, 12	; zwolnienie pamieci po wypisaniu daty
+	pop edx
 ; zerowanie wyniku dla kolejnego swieta
 	push edi	; zapamietanie dotychczasowego edi aby wyzerowac wynik
 	mov edi, offset wynik
