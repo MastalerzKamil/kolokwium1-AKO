@@ -5,11 +5,10 @@ extern __write : PROC
 public _main
 
 .data
-ilosc_swiat		dd 0
 swieta			dd 0AAAAAAAAh
-wynik			dd ?, ?, '.', ?, ?, 0
-miesiac			dd 0, 0
-dzien			dd 0, 0
+wynik			db ?, ?, '.', ?, ?, ','
+miesiac			db 0, 0
+dzien			db 0, 0
 system_liczbowy db 10
 .code
 _main PROC
@@ -28,8 +27,9 @@ licz_miesiac_dziesietnie:
 	div system_liczbowy
 	dec ebx
 	add ah, '0'	; zamiana liczby na znak ASCII
-	mov byte PTR[edi+4*ebx], ah	; wyliczanie adresu efektywnego dla miesiaca w pamieci czyli adres+4*ilosc_cyfer 
+	mov byte PTR[edi+ebx], ah	; wyliczanie adresu efektywnego dla miesiaca w pamieci czyli adres+4*ilosc_cyfer 
 									; oraz wsadzenie tam cyfry w ASCII
+	mov ah, 0	; zerowaniepo zapisie znaku ASCII do pamieci
 	cmp al, 0
 	jnz licz_miesiac_dziesietnie
 	pop eax ; zdjecie zawartosci eax sprzed dzielenia
@@ -46,7 +46,6 @@ ptl:
 	jnz ptl	;  przyadek gdy nie ma swieta  ale tez nie ma konca miesiaca
 	jmp koniec_miesiaca ; przypadek gdy jest koniec miesiaca i nie bylo swieta
 jest_swieto:
-	add ilosc_swiat, 1
 	push ecx	; zapamietanie zawartosci ecx w ktorym jest wartosc miesiaca
 	push edi	; zapamietanie edi w ktorym bedzie zmiennadla dnia miesiaca
 	push eax	; zapamietanie eax w celu zamiany na cyfry
@@ -57,7 +56,7 @@ licz_dzien_dziesietnie:
 	div system_liczbowy
 	dec ecx	; zmniejszam bo od prawej strony cyfry wyliczaja sie
 	add ah, '0'	;zamiana iczby na znak ASCII
-	mov byte PTR[edi+4*ecx], ah	; wyliczanie adresu efektywnego dla miesiaca w pamieci czyli adres+4*ilosc_cyfer 
+	mov byte PTR[edi+ecx], ah	; wyliczanie adresu efektywnego dla miesiaca w pamieci czyli adres+4*ilosc_cyfer 
 									; oraz wsadzenie tam cyfry w ASCII
 	mov ah, 0	; zerowanie ah po zapisaniu do pamieci
 	cmp al, 0
@@ -74,24 +73,24 @@ licz_dzien_dziesietnie:
 	mov ecx, 0
 	mov edi, offset wynik
 	mov esi, offset dzien
-	mov eax, [esi]	; cyfra dziesiatek dnia
-	mov [edi+4*ecx], eax	; cyfra dziesiatek dnia w wyniku
+	mov al, [esi]	; cyfra dziesiatek dnia
+	mov [edi+ecx], al	; cyfra dziesiatek dnia w wyniku
 	inc ecx
-	mov eax, [esi+4]	; cyfra jednosci dnia
-	mov [edi+4*ecx], eax	; cyfra jednosci dnia w wyniku
+	mov al, [esi+1]	; cyfra jednosci dnia
+	mov [edi+ecx], al	; cyfra jednosci dnia w wyniku
 	inc ecx
-	mov [edi+4*ecx], dword PTR '.'	;przecinek w wyniku
+	mov [edi+ecx], byte PTR '.'	;przecinek w wyniku
 	inc ecx
 	mov esi, offset miesiac
-	mov eax, [esi]	;cyfra dziesiatek z miesiaca
-	mov [edi+4*ecx], eax	; cyfra dziesiatek miesiaca w wyniku
+	mov al, [esi]	;cyfra dziesiatek z miesiaca
+	mov [edi+ecx], al	; cyfra dziesiatek miesiaca w wyniku
 	inc ecx
-	mov eax, [esi+4]	; cyfra jednosci z miesiaca
-	mov [edi+4*ecx], eax	; cyfra jednosci z miesiaca w wyniku
+	mov al, [esi+1]	; cyfra jednosci z miesiaca
+	mov [edi+ecx], al	; cyfra jednosci z miesiaca w wyniku
 ; zerowanie dnia dla kolejnych obiegow petli
 	mov esi, offset dzien
-	mov [esi], dword PTR 0
-	mov [esi+4], dword PTR 0
+	mov [esi], byte PTR 0
+	mov [esi+1], byte PTR 0
 ; zdejmowanie rejestrow zzapisywania do wyniku
 	pop ecx
 	pop eax
@@ -100,7 +99,7 @@ licz_dzien_dziesietnie:
 
 ; wypisywanie w konsoli
 	push edx	; zapamietanie edx
-	push dword PTR 24 ; push(dzien+dzien+'.'+miesiac+miesiac+0)
+	push dword PTR 6 ; push(dzien+dzien+'.'+miesiac+miesiac)
 	push OFFSET wynik	; wartosc daty
 	push dword PTR 1	; numer urzadzenia (numer ekranu=1)
 	call __write
@@ -109,11 +108,11 @@ licz_dzien_dziesietnie:
 ; zerowanie wyniku dla kolejnego swieta
 	push edi	; zapamietanie dotychczasowego edi aby wyzerowac wynik
 	mov edi, offset wynik
-	mov [edi], dword PTR 0	; dzien
-	mov [edi+4], dword PTR 0	; dzien
-	mov [edi+8], dword PTR '.'	; separator
-	mov [edi+12], dword PTR 0	; miesiac
-	mov [edi+ 16], dword PTR 0	; miesiac
+	mov [edi], byte PTR 0	; dzien
+	mov [edi+1], byte PTR 0	; dzien
+	mov [edi+2], byte PTR '.'	; separator
+	mov [edi+3], byte PTR 0	; miesiac
+	mov [edi+ 4], byte PTR 0	; miesiac
 	pop edi
 
 	dec edx ; aby kolejny bit wziac pod uwage
