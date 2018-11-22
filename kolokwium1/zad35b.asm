@@ -2,7 +2,7 @@
 .model flat
 extern _ExitProcess@4 : PROC
 extern __write : PROC
-public _main
+; public _main
 
 .data
 swieta			dd 0AAAAAAAAh
@@ -11,7 +11,7 @@ miesiac			db 0, 0
 dzien			db 0, 0
 system_liczbowy db 10
 .code
-_main PROC
+; _main PROC
 	; edx - iterator po bitach miesiaca
 	; esi - element tablicy dni miesiaca
 	mov ecx, 9
@@ -121,5 +121,5 @@ licz_dzien_dziesietnie:
 koniec_miesiaca:
 	push 0
 	call _ExitProcess@4
-_main ENDP
+; _main ENDP
 END
