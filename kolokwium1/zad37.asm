@@ -1,14 +1,14 @@
 .686
 .model flat
 extern _ExitProcess@4 : PROC
-public _main
+; public _main
 
 .data
 ilosc_4bajtowych	dd 32	; 32*32 = 1024
 rejestr1024			dd 32 dup (0AAAAAAAAh)
 
 .code
-_main PROC
+; _main PROC
 	mov esi, offset rejestr1024
 	mov edi, esi	; adres do zapisu ten sam
 	mov ecx, 0
@@ -21,5 +21,5 @@ ptl:
 	jne ptl
 	push 0
 	call _ExitProcess@4
-_main ENDP
+; _main ENDP
 END
